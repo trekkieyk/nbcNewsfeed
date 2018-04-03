@@ -14,6 +14,7 @@ protocol NewsItemProtocol: class {
     var teaseURL: String { get }
     var teaseImage: UIImage? { get }
     var type: NewsItemType { get }
+    var imageHeightToWidth: CGFloat? { get }
 }
 
 enum NewsItemType: String {
@@ -29,11 +30,21 @@ class NewsItem: NewsItemProtocol {
     
     private(set) var teaseURL: String = ""
     
-    private(set) var teaseImage: UIImage? = nil
+    private(set) var teaseImage: UIImage? = nil {
+        didSet {
+            if teaseImage == nil {
+                imageHeightToWidth = nil
+            } else {
+                imageHeightToWidth = teaseImage!.size.height / teaseImage!.size.width
+            }
+        }
+    }
     
     var type: NewsItemType {
         return .none
     }
+    
+    private(set) var imageHeightToWidth: CGFloat? = nil
     
     func fatalErrorIfBase() {
         fatalError("Please don't create an instance of this class")
@@ -49,7 +60,7 @@ class NewsItem: NewsItemProtocol {
         self.teaseURL = teaseURL
         self.teaseImage = teaseImage
         if teaseImage == nil {
-            FeedFetchHandler.fetchImage(url: self.teaseURL, successHandler: {[weak self] (image) in
+            NetworkHandler.fetchImage(url: self.teaseURL, successHandler: {[weak self] (image) in
                 self?.teaseImage = image
             })
         }

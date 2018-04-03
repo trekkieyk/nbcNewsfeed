@@ -25,10 +25,37 @@ class NewsItemFactory {
         }
         struct Section {
             static let items            = "items"
+            static let header           = "header"
+            static let subHeader        = "subHeader"
         }
     }
     
-    static func createItem(dict: [String : Any]) -> NewsItem? {
+    private(set) static var shared: NewsItemFactory = NewsItemFactory()
+    
+    private var allItems: [String : NewsItem] = [:]
+    private(set) var sections: [NewsSection] = []
+    
+//    static var shared: NewsItemFactory {
+//        if _shared == nil {
+//            _shared = NewsItemFactory()
+//        }
+//        return _shared
+//    }
+    
+    func fetchItems() {
+        NetworkHandler.getData {[weak self] (sections) in
+            var newSections: [NewsSection] = []
+            for case let jsonSection as [String : Any] in sections {
+                if let newSection = self?.createItem(dict: jsonSection) as? NewsSection {
+                    newSections.append(newSection)
+                }
+            }
+            self?.sections = newSections
+            NotificationCenter.default.post(Notification(name: Notifications.Factory.sectionsUpdated))
+        }
+    }
+    
+    func createItem(dict: [String : Any]) -> NewsItem? {
         let malformedDataError: (String) -> () = {(key: String) in
             print("The dictionary is missing the key '\(key)'")
         }
@@ -78,10 +105,14 @@ class NewsItemFactory {
                 newItem = NewsArticle(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
             }
         }
+        if newItem != nil {
+            allItems[newItem!.id] = newItem!
+            print("\(newItem!.id) created")
+        }
         return newItem
     }
     
-    static let dateFormatter: ISO8601DateFormatter = {
+    let dateFormatter: ISO8601DateFormatter = {
         var formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullTime, .withFullDate, .withDashSeparatorInDate, .withColonSeparatorInTime]
         return formatter
