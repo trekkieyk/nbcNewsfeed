@@ -36,7 +36,6 @@ class FeedFetchHandler {
                     print("Data is malformed")
                     return
                 }
-                print(parsedData)
                 let section: NewsItem? = NewsItemFactory.createItem(dict: parsedData)
                 print()
                 let otherData = parsedData

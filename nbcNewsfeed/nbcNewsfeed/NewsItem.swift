@@ -9,14 +9,11 @@
 import Foundation
 import UIKit
 
-protocol NewsItem: class {
-    var id: String { get set }
-    var teaseURL: String { get set }
-    var teaseImage: UIImage? { get set }
+protocol NewsItemProtocol: class {
+    var id: String { get }
+    var teaseURL: String { get }
+    var teaseImage: UIImage? { get }
     var type: NewsItemType { get }
-    static var idKey: String { get }
-    static var teaseKey: String { get }
-    static var typeKey: String { get }
 }
 
 enum NewsItemType: String {
@@ -27,34 +24,12 @@ enum NewsItemType: String {
     case none = "NONE"
 }
 
-extension NewsItem {
-    static var idKey: String {
-        return "id"
-    }
-    static var teaseKey: String {
-        return "tease"
-    }
-    static var typeKey: String {
-        return "type"
-    }
-    func sharedInit(id: String, teaseURL: String, teaseImage: UIImage? = nil) {
-        self.id = id
-        self.teaseURL = teaseURL
-        self.teaseImage = teaseImage
-        if teaseImage == nil {
-            FeedFetchHandler.fetchImage(url: self.teaseURL, successHandler: {[weak self] (image) in
-                self?.teaseImage = image
-            })
-        }
-    }
-}
-
-class BaseNewsItem: NewsItem {
-    var id: String = ""
+class NewsItem: NewsItemProtocol {
+    private(set) var id: String = ""
     
-    var teaseURL: String = ""
+    private(set) var teaseURL: String = ""
     
-    var teaseImage: UIImage? = nil
+    private(set) var teaseImage: UIImage? = nil
     
     var type: NewsItemType {
         return .none
@@ -67,5 +42,16 @@ class BaseNewsItem: NewsItem {
     init(id: String, teaseURL: String, teaseImage: UIImage? = nil) {
         sharedInit(id: id, teaseURL: teaseURL, teaseImage: teaseImage)
         fatalErrorIfBase()
+    }
+    
+    func sharedInit(id: String, teaseURL: String, teaseImage: UIImage? = nil) {
+        self.id = id
+        self.teaseURL = teaseURL
+        self.teaseImage = teaseImage
+        if teaseImage == nil {
+            FeedFetchHandler.fetchImage(url: self.teaseURL, successHandler: {[weak self] (image) in
+                self?.teaseImage = image
+            })
+        }
     }
 }

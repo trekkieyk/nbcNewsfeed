@@ -18,6 +18,7 @@
 		B865BA572072A427000BE21E /* FeedFetchHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B865BA562072A427000BE21E /* FeedFetchHandler.swift */; };
 		B865BA592072B908000BE21E /* NewsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B865BA582072B908000BE21E /* NewsSection.swift */; };
 		B88A1BE72072C42D00250AA1 /* NewsItemFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88A1BE62072C42D00250AA1 /* NewsItemFactory.swift */; };
+		B88A1BE92072DEC000250AA1 /* NewsArticle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88A1BE82072DEC000250AA1 /* NewsArticle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		B865BA562072A427000BE21E /* FeedFetchHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFetchHandler.swift; sourceTree = "<group>"; };
 		B865BA582072B908000BE21E /* NewsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsSection.swift; sourceTree = "<group>"; };
 		B88A1BE62072C42D00250AA1 /* NewsItemFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsItemFactory.swift; sourceTree = "<group>"; };
+		B88A1BE82072DEC000250AA1 /* NewsArticle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsArticle.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				B865BA562072A427000BE21E /* FeedFetchHandler.swift */,
 				B865BA582072B908000BE21E /* NewsSection.swift */,
 				B88A1BE62072C42D00250AA1 /* NewsItemFactory.swift */,
+				B88A1BE82072DEC000250AA1 /* NewsArticle.swift */,
 			);
 			path = nbcNewsfeed;
 			sourceTree = "<group>";
@@ -219,6 +222,7 @@
 				B865BA592072B908000BE21E /* NewsSection.swift in Sources */,
 				B865BA3220729E7E000BE21E /* AppDelegate.swift in Sources */,
 				B865BA552072A1CC000BE21E /* NewsItem.swift in Sources */,
+				B88A1BE92072DEC000250AA1 /* NewsArticle.swift in Sources */,
 				B88A1BE72072C42D00250AA1 /* NewsItemFactory.swift in Sources */,
 				B865BA572072A427000BE21E /* FeedFetchHandler.swift in Sources */,
 			);
