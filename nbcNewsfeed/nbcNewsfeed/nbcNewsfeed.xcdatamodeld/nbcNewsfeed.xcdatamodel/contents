@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <elements/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13772" systemVersion="16G1314" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="NewsArticleEntity" representedClassName=".NewsArticle" parentEntity="NewsSectionItemEntity" syncable="YES"/>
+    <entity name="NewsItemEntity" representedClassName=".NewsItem" isAbstract="YES" syncable="YES">
+        <attribute name="id" attributeType="String" syncable="YES"/>
+        <attribute name="teaseImageData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES" customClassName="." syncable="YES"/>
+        <attribute name="teaseURL" attributeType="URI" syncable="YES"/>
+    </entity>
+    <entity name="NewsSectionEntity" representedClassName=".NewsSection" parentEntity="NewsItemEntity" syncable="YES">
+        <attribute name="header" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="subHeader" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="itemSet" toMany="YES" deletionRule="Cascade" destinationEntity="NewsSectionItemEntity" syncable="YES"/>
+    </entity>
+    <entity name="NewsSectionItemEntity" representedClassName=".NewsSectionItem" isAbstract="YES" parentEntity="NewsItemEntity" syncable="YES">
+        <attribute name="breakingLabel" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="headline" attributeType="String" syncable="YES"/>
+        <attribute name="published" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="summary" attributeType="String" syncable="YES"/>
+        <attribute name="url" attributeType="URI" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="NewsArticleEntity" positionX="-351" positionY="270" width="128" height="45"/>
+        <element name="NewsItemEntity" positionX="-63" positionY="-18" width="128" height="90"/>
+        <element name="NewsSectionEntity" positionX="160" positionY="135" width="128" height="90"/>
+        <element name="NewsSectionItemEntity" positionX="-360" positionY="24" width="128" height="120"/>
+    </elements>
 </model>

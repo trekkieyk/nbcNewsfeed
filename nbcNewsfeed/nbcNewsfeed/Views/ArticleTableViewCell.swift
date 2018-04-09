@@ -79,7 +79,7 @@ class ArticleTableViewCell: SectionItemTableViewCell {
         super.init(coder: aDecoder)
     }
     
-    override func populate(newsItem: SectionItemProtocol, withImage: Bool = true) {
+    override func populate(newsItem: NewsSectionItem, withImage: Bool = true) {
         guard let article = newsItem as? NewsArticle else {
             return
         }

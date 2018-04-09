@@ -8,18 +8,21 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 class NewsSection: NewsItem {
     override var type: NewsItemType { return .section }
+    @NSManaged private(set) var header: String?
+    @NSManaged private(set) var subHeader: String?
     override func fatalErrorIfBase() { }
     
-    private var itemIDs: Set<String> = []
-    private var itemDict: [String : SectionItemProtocol] = [:]
-    private var items: [SectionItemProtocol] = [] {
-        didSet {
-            items.sort { (first, second) -> Bool in
-                return first.published >= second.published
-            }
+    private var itemDict: [String : NewsSectionItem] = [:]
+    @NSManaged private var itemSet: Set<NewsSectionItem>
+    private var items: [NewsSectionItem] = []
+    
+    private func sortItems() {
+        items.sort { (first, second) -> Bool in
+            return first.published >= second.published
         }
     }
     
@@ -27,31 +30,54 @@ class NewsSection: NewsItem {
         return items.count
     }
     
-    func getItem(at index: Int) -> SectionItemProtocol? {
+    override class var entityName: String {
+        return "NewsSectionEntity"
+    }
+    
+    func getItem(at index: Int) -> NewsSectionItem? {
         guard index >= 0 && index < itemCount else {
             return nil
         }
         return items[index]
     }
     
-    func getItem(byID id: String) -> SectionItemProtocol? {
+    func getItem(byID id: String) -> NewsSectionItem? {
         return itemDict[id]
     }
     
-    override init(id: String, teaseURL url: String, teaseImage image: UIImage? = nil) {
-        super.init(id: id, teaseURL: url, teaseImage: image)
+    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertInto: context)
     }
     
-    func insertItem(newItem item: SectionItemProtocol) {
+    convenience init(id: String, teaseURL url: URL, teaseImageData imageData: Data? = nil, header: String? = nil, subHeader: String? = nil) {
+        self.init(id: id, teaseURL: url, teaseImageData: imageData)
+        self.header = header
+        self.subHeader = subHeader
+    }
+    
+    private override init(id: String, teaseURL: URL, teaseImageData: Data?, entity: NSEntityDescription? = nil) {
+        var entityToUse = entity
+        if entityToUse == nil {
+            entityToUse = NSEntityDescription.entity(forEntityName: NewsSection.entityName, in: NewsItemFactory.shared.persistentcontainer.viewContext)
+        }
+        super.init(id: id, teaseURL: teaseURL, teaseImageData: teaseImageData, entity: entityToUse)
+        self.header = ""
+        self.subHeader = ""
+        self.items = []
+    }
+    
+    func insertItem(newItem item: NewsSectionItem) {
         guard itemDict[item.id] == nil else {
             return
         }
         itemDict[item.id] = item
+        itemSet.insert(item)
         items.append(item)
+        sortItems()
     }
     
-    func insertItems(newItems: [SectionItemProtocol]) {
-        var selected: [SectionItemProtocol] = []
+    func insertItems(newItems: [NewsSectionItem]) {
+        var selected: [NewsSectionItem] = []
         for item in newItems {
             guard itemDict[item.id] == nil else {
                 continue
@@ -59,14 +85,19 @@ class NewsSection: NewsItem {
             itemDict[item.id] = item
             selected.append(item)
         }
+        itemSet.formUnion(selected)
         items.append(contentsOf: selected)
+        sortItems()
     }
-}
-
-protocol SectionItemProtocol: NewsItemProtocol {
-    var headline: String { get }
-    var published: Date { get }
-    var url: String { get }
-    var summary: String { get }
-    var breakingLabel: String? { get }
+    
+    override func awakeFromFetch() {
+        super.awakeFromFetch()
+        insertItems(newItems: Array<NewsSectionItem>(itemSet))
+    }
+    
+    func updateFromNetwork(teaseURL: URL, header: String?, subHeader: String?) {
+        updateFromNetwork(teaseURL: teaseURL)
+        self.header = header
+        self.subHeader = subHeader
+    }
 }

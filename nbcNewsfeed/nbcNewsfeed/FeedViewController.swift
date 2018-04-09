@@ -71,7 +71,7 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
         return 0
     }
     
-    private func newsItem(forIndexPath indexPath: IndexPath) -> SectionItemProtocol? {
+    private func newsItem(forIndexPath indexPath: IndexPath) -> NewsSectionItem? {
         let sections = self.sections
         guard indexPath.section < sections.count else {
             return nil
@@ -87,11 +87,17 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let newsItem = newsItem(forIndexPath: indexPath), let url = URL(string: newsItem.url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        if let newsItem = newsItem(forIndexPath: indexPath) {
+            UIApplication.shared.open(newsItem.url, options: [:], completionHandler: nil)
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard section < sections.count else {
+            return nil
+        }
+        return sections[section].header
+    }
 }
 

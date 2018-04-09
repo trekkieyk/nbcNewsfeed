@@ -8,10 +8,11 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 protocol NewsItemProtocol: class {
     var id: String { get }
-    var teaseURL: String { get }
+    var teaseURL: URL { get }
     var teaseImage: UIImage? { get }
     var type: NewsItemType { get }
     var imageHeightToWidth: CGFloat? { get }
@@ -25,23 +26,42 @@ enum NewsItemType: String {
     case none = "NONE"
 }
 
-class NewsItem: NewsItemProtocol {
-    private(set) var id: String = ""
+class NewsItem: NSManagedObject, NewsItemProtocol {
+    @NSManaged private(set) var id: String
     
-    private(set) var teaseURL: String = ""
+    @NSManaged private(set) var teaseURL: URL
     
-    private(set) var teaseImage: UIImage? = nil {
-        didSet {
-            if teaseImage == nil {
-                imageHeightToWidth = nil
-            } else {
-                imageHeightToWidth = teaseImage!.size.height / teaseImage!.size.width
-            }
+    var teaseImage: UIImage? {
+        guard let data = teaseImageData else {
+            return nil
+        }
+        if currentDataAndImage?.data == data {
+            return currentDataAndImage?.image
+        }
+        if let image = UIImage(data: data) {
+            currentDataAndImage = (data: data, image: image)
+        }
+        return currentDataAndImage?.image
+    }
+    
+    private var currentDataAndImage: (data: Data, image: UIImage)?
+    
+    @NSManaged private var teaseImageData: Data?
+    
+    private func calculateImageDimensions() {
+        if teaseImage == nil {
+            imageHeightToWidth = nil
+        } else {
+            imageHeightToWidth = teaseImage!.size.height / teaseImage!.size.width
         }
     }
     
     var type: NewsItemType {
         return .none
+    }
+    
+    class var entityName: String {
+        return "NewsItemEntity"
     }
     
     private(set) var imageHeightToWidth: CGFloat? = nil
@@ -50,19 +70,52 @@ class NewsItem: NewsItemProtocol {
         fatalError("Please don't create an instance of this class")
     }
     
-    init(id: String, teaseURL: String, teaseImage: UIImage? = nil) {
-        sharedInit(id: id, teaseURL: teaseURL, teaseImage: teaseImage)
+    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertInto: context)
+        if teaseImageData == nil {
+            fetchImage()
+        } else {
+            calculateImageDimensions()
+        }
+    }
+    
+    init(id: String, teaseURL: URL, teaseImageData: Data? = nil, entity: NSEntityDescription? = nil) {
+        var entityToUse = entity
+        if entityToUse == nil {
+            entityToUse = NSEntityDescription.entity(forEntityName: NewsItem.entityName, in: NewsItemFactory.shared.persistentcontainer.viewContext)
+        }
+        super.init(entity: entityToUse!, insertInto: NewsItemFactory.shared.persistentcontainer.viewContext)
+        self.id = id
+        self.teaseURL = teaseURL
+        self.teaseImageData = teaseImageData
+        calculateImageDimensions()
+        if self.teaseImageData == nil {
+            fetchImage()
+        }
         fatalErrorIfBase()
     }
     
-    func sharedInit(id: String, teaseURL: String, teaseImage: UIImage? = nil) {
-        self.id = id
-        self.teaseURL = teaseURL
-        self.teaseImage = teaseImage
-        if teaseImage == nil {
-            NetworkHandler.fetchImage(url: self.teaseURL, successHandler: {[weak self] (image) in
-                self?.teaseImage = image
-            })
+    override func awakeFromFetch() {
+        super.awakeFromFetch()
+        NewsItemFactory.shared.registerItem(self)
+    }
+    
+    func updateFromNetwork(teaseURL: URL) {
+        guard self.teaseURL != teaseURL else {
+            return
         }
+        self.teaseURL = teaseURL
+        teaseImageData = nil
+        fetchImage()
+    }
+    
+    private func fetchImage() {
+        NetworkHandler.fetchImage(url: self.teaseURL, successHandler: {[weak self] (imageData) in
+            guard self?.teaseImageData != imageData else {
+                return
+            }
+            self?.teaseImageData = imageData
+            self?.calculateImageDimensions()
+        })
     }
 }

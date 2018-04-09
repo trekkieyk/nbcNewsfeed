@@ -36,7 +36,7 @@ class NetworkHandler {
                     print("Data is malformed")
                     return
                 }
-                let section: NewsItem? = NewsItemFactory.shared.createItem(dict: parsedData)
+                let section: NewsItem? = NewsItemFactory.shared.getOrCreateItem(dict: parsedData)
                 print()
                 let otherData = parsedData
                 print(section?.id ?? "")
@@ -75,19 +75,36 @@ class NetworkHandler {
             }.resume()
     }
     
-    static func fetchImage(url urlStr: String, successHandler: @escaping (UIImage) -> ()) {
+    private static var fetchesForURL: [URL : [(Data) -> ()]] = [:]
+    
+    private static var imageFetchQueue: DispatchQueue = DispatchQueue(label: "imageFetcher", qos: DispatchQoS.utility)
+    
+    static func fetchImage(url urlStr: String, successHandler: @escaping (Data) -> ()) {
         guard let url = urlFromString(str: urlStr) else {
             return
         }
         fetchImage(url: url, successHandler: successHandler)
     }
     
-    static func fetchImage(url: URL, successHandler: @escaping (UIImage) -> ()) {
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let data = data, let image = UIImage(data: data) {
-                successHandler(image)
+    static func fetchImage(url: URL, successHandler: @escaping (Data) -> ()) {
+        imageFetchQueue.async {
+            guard fetchesForURL[url] == nil else {
+                fetchesForURL[url]?.append(successHandler)
+                return
             }
-        }.resume()
+            fetchesForURL[url] = []
+            fetchesForURL[url]?.append(successHandler)
+            URLSession.shared.dataTask(with: url) { (data, response, error) in
+                if let data = data {
+                    var i = 0
+                    while i < fetchesForURL[url]?.count ?? 0 {
+                        fetchesForURL[url]?[i](data)
+                        i += 1
+                    }
+                }
+                fetchesForURL[url] = nil
+                }.resume()
+        }
     }
     
     static func urlFromString(str: String) -> URL? {

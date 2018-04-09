@@ -8,26 +8,29 @@
 
 import Foundation
 import UIKit.UIImage
+import CoreData
 
-class NewsArticle: NewsItem, SectionItemProtocol {
-    private(set) var headline: String
-    private(set) var published: Date
-    private(set) var url: String
-    private(set) var summary: String
-    private(set) var breakingLabel: String?
+class NewsArticle: NewsSectionItem {
     
     override var type: NewsItemType {
         return .article
     }
     
+    override class var entityName: String {
+        return "NewsArticleEntity"
+    }
+    
     override func fatalErrorIfBase() { }
     
-    init(id: String, teaseURL: String, teaseImage: UIImage? = nil, headline: String, published: Date, url: String, summary: String, breakingLabel: String? = nil) {
-        self.headline = headline
-        self.published = published
-        self.url = url
-        self.summary = summary
-        self.breakingLabel = breakingLabel
-        super.init(id: id, teaseURL: teaseURL, teaseImage: teaseImage)
+    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertInto: context)
+    }
+    
+    override init(id: String, teaseURL: URL, teaseImageData: Data? = nil, entity: NSEntityDescription? = nil, headline: String, published: Date, url: URL, summary: String, breakingLabel: String? = nil) {
+        var entityToUse = entity
+        if entityToUse == nil {
+            entityToUse = NSEntityDescription.entity(forEntityName: NewsArticle.entityName, in: NewsItemFactory.shared.persistentcontainer.viewContext)
+        }
+        super.init(id: id, teaseURL: teaseURL, teaseImageData: teaseImageData, entity: entityToUse, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
     }
 }

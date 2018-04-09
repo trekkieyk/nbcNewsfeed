@@ -22,6 +22,7 @@
 		B88A1BE72072C42D00250AA1 /* NewsItemFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88A1BE62072C42D00250AA1 /* NewsItemFactory.swift */; };
 		B88A1BE92072DEC000250AA1 /* NewsArticle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88A1BE82072DEC000250AA1 /* NewsArticle.swift */; };
 		B88A1BEF2073121100250AA1 /* ArticleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88A1BEE2073121100250AA1 /* ArticleTableViewCell.swift */; };
+		B8E9ABC5207BF896001222F2 /* NewsSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E9ABC4207BF896001222F2 /* NewsSectionItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		B88A1BE62072C42D00250AA1 /* NewsItemFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsItemFactory.swift; sourceTree = "<group>"; };
 		B88A1BE82072DEC000250AA1 /* NewsArticle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsArticle.swift; sourceTree = "<group>"; };
 		B88A1BEE2073121100250AA1 /* ArticleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleTableViewCell.swift; sourceTree = "<group>"; };
+		B8E9ABC4207BF896001222F2 /* NewsSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsSectionItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +128,7 @@
 				B865BA562072A427000BE21E /* NetworkHandler.swift */,
 				B865BA582072B908000BE21E /* NewsSection.swift */,
 				B88A1BE82072DEC000250AA1 /* NewsArticle.swift */,
+				B8E9ABC4207BF896001222F2 /* NewsSectionItem.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -247,6 +250,7 @@
 				B880D3B2207401AA009E0EB5 /* Notifications.swift in Sources */,
 				B865BA3420729E7E000BE21E /* FeedViewController.swift in Sources */,
 				B865BA592072B908000BE21E /* NewsSection.swift in Sources */,
+				B8E9ABC5207BF896001222F2 /* NewsSectionItem.swift in Sources */,
 				B865BA3220729E7E000BE21E /* AppDelegate.swift in Sources */,
 				B865BA552072A1CC000BE21E /* NewsItem.swift in Sources */,
 				B880D3B02073FB8E009E0EB5 /* SectionItemTableViewCell.swift in Sources */,

@@ -10,5 +10,5 @@ import UIKit
 
 class SectionItemTableViewCell: UITableViewCell {
     
-    func populate(newsItem: SectionItemProtocol, withImage: Bool = true) {}
+    func populate(newsItem: NewsSectionItem, withImage: Bool = true) {}
 }

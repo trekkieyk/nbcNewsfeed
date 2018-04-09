@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit.UIImage
+import CoreData
 
 class NewsItemFactory {
     struct Keys {
@@ -32,21 +33,28 @@ class NewsItemFactory {
     
     private(set) static var shared: NewsItemFactory = NewsItemFactory()
     
+    weak var persistentcontainer: NSPersistentContainer!
+    
     private var allItems: [String : NewsItem] = [:]
     private(set) var sections: [NewsSection] = []
     
-//    static var shared: NewsItemFactory {
-//        if _shared == nil {
-//            _shared = NewsItemFactory()
-//        }
-//        return _shared
-//    }
+    func fetchItemsFromCoreData() {
+        let fetchRequest = NSFetchRequest<NewsSection>(entityName: NewsSection.entityName)
+        do {
+            sections = try persistentcontainer.viewContext.fetch(fetchRequest)
+        } catch let error as NSError {
+            print("Couldn't fetch from Core Data. \(error), \(error.userInfo)")
+        }
+    }
     
     func fetchItems() {
+        if sections.isEmpty {
+            fetchItemsFromCoreData()
+        }
         NetworkHandler.getData {[weak self] (sections) in
             var newSections: [NewsSection] = []
             for case let jsonSection as [String : Any] in sections {
-                if let newSection = self?.createItem(dict: jsonSection) as? NewsSection {
+                if let newSection = self?.getOrCreateItem(dict: jsonSection) as? NewsSection {
                     newSections.append(newSection)
                 }
             }
@@ -55,7 +63,7 @@ class NewsItemFactory {
         }
     }
     
-    func createItem(dict: [String : Any]) -> NewsItem? {
+    func getOrCreateItem(dict: [String : Any]) -> NewsItem? {
         let malformedDataError: (String) -> () = {(key: String) in
             print("The dictionary is missing the key '\(key)'")
         }
@@ -68,16 +76,23 @@ class NewsItemFactory {
             malformedDataError(Keys.NewsItem.id)
             return nil
         }
-        guard let teaseURL: String = dict[Keys.NewsItem.tease] as? String else {
+        newItem = allItems[id]
+        guard let teaseURLStr: String = dict[Keys.NewsItem.tease] as? String, let teaseURL = URL(string: teaseURLStr) else {
             malformedDataError(Keys.NewsItem.tease)
             return nil
         }
         if type == NewsItemType.section {
-            newItem = NewsSection(id: id, teaseURL: teaseURL)
-            var subItems: [SectionItemProtocol] = []
+            let header = dict[Keys.Section.header] as? String
+            let subHeader = dict[Keys.Section.subHeader] as? String
+            if let section = newItem as? NewsSection {
+                section.updateFromNetwork(teaseURL: teaseURL, header: header, subHeader: subHeader)
+            } else {
+                newItem = NewsSection(id: id, teaseURL: teaseURL, header: header, subHeader: subHeader)
+            }
+            var subItems: [NewsSectionItem] = []
             if let itemsList: [[String : Any]] = dict[Keys.Section.items] as? [[String : Any]] {
                 for subItemDict in itemsList {
-                    if let newSubItem = createItem(dict: subItemDict) as? SectionItemProtocol {
+                    if let newSubItem = getOrCreateItem(dict: subItemDict) as? NewsSectionItem {
                         subItems.append(newSubItem)
                     }
                 }
@@ -92,7 +107,7 @@ class NewsItemFactory {
                 malformedDataError(Keys.SectionItem.published)
                 return nil
             }
-            guard let url: String = dict[Keys.SectionItem.url] as? String else {
+            guard let urlStr: String = dict[Keys.SectionItem.url] as? String, let url = URL(string: urlStr) else {
                 malformedDataError(Keys.SectionItem.url)
                 return nil
             }
@@ -102,7 +117,11 @@ class NewsItemFactory {
             }
             let breakingLabel: String? = dict[Keys.SectionItem.breakingLabel] as? String
             if type == NewsItemType.article {
-                newItem = NewsArticle(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
+                if let article = newItem as? NewsArticle {
+                    article.updateFromNetwork(teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
+                } else {
+                    newItem = NewsArticle(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
+                }
             }
         }
         if newItem != nil {
@@ -117,4 +136,8 @@ class NewsItemFactory {
         formatter.formatOptions = [.withFullTime, .withFullDate, .withDashSeparatorInDate, .withColonSeparatorInTime]
         return formatter
     }()
+    
+    func registerItem(_ item: NewsItem) {
+        allItems[item.id] = item
+    }
 }
