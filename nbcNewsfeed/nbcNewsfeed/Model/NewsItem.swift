@@ -66,6 +66,10 @@ class NewsItem: NSManagedObject, NewsItemProtocol {
     
     private(set) var imageHeightToWidth: CGFloat? = nil
     
+    var mediaHeightToWidth: CGFloat? {
+        return imageHeightToWidth
+    }
+    
     func fatalErrorIfBase() {
         fatalError("Please don't create an instance of this class")
     }

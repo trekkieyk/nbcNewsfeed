@@ -29,6 +29,11 @@ class NewsItemFactory {
             static let header           = "header"
             static let subHeader        = "subHeader"
         }
+        struct Video {
+            static let duration         = "duration"
+            static let preview          = "preview"
+            static let videoUrl         = "videoUrl"
+        }
     }
     
     private(set) static var shared: NewsItemFactory = NewsItemFactory()
@@ -51,7 +56,7 @@ class NewsItemFactory {
         if sections.isEmpty {
             fetchItemsFromCoreData()
         }
-        NetworkHandler.getData {[weak self] (sections) in
+        NetworkHandler.getData(count: 500) {[weak self] (sections) in
             var newSections: [NewsSection] = []
             for case let jsonSection as [String : Any] in sections {
                 if let newSection = self?.getOrCreateItem(dict: jsonSection) as? NewsSection {
@@ -121,6 +126,20 @@ class NewsItemFactory {
                     article.updateFromNetwork(teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
                 } else {
                     newItem = NewsArticle(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
+                }
+            } else if type == NewsItemType.video {
+                guard let duration = dict[Keys.Video.duration] as? String else {
+                    malformedDataError(Keys.Video.duration)
+                    return nil
+                }
+                guard let previewStr = dict[Keys.Video.preview] as? String, let previewURL = URL(string: previewStr) else {
+                    malformedDataError(Keys.Video.preview)
+                    return nil
+                }
+                if let video = newItem as? NewsVideo {
+                    video.updateFromNetwork(teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel, duration: duration, previewURL: previewURL)
+                } else {
+                    newItem = NewsVideo(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel, duration: duration, previewURL: previewURL)
                 }
             }
         }

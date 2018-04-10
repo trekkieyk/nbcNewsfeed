@@ -49,8 +49,11 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
         var cell: SectionItemTableViewCell?
         if newsItem is NewsArticle {
             cell = tableView.dequeueReusableCell(withIdentifier: ArticleTableViewCell.reuseIdentifier, for: indexPath) as? SectionItemTableViewCell
-            cell?.populate(newsItem: newsItem, withImage: !showWithoutImage.contains(indexPath))
         }
+        if newsItem is NewsVideo {
+            cell = tableView.dequeueReusableCell(withIdentifier: VideoTableViewCell.reuseIdentifier, for: indexPath) as? SectionItemTableViewCell
+        }
+        cell?.populate(newsItem: newsItem, withMedia: !showWithoutImage.contains(indexPath))
         showWithoutImage.remove(indexPath)
         return cell ?? UITableViewCell()
     }
@@ -66,7 +69,10 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
             showWithoutImage.insert(indexPath)
         }
         if newsItem is NewsArticle {
-            return ArticleTableViewCell.heightForDetails(headline: newsItem.headline, summary: newsItem.summary, withImage: hasImage, imageHeightToWidth: newsItem.imageHeightToWidth)
+            return ArticleTableViewCell.heightForDetails(headline: newsItem.headline, summary: newsItem.summary, withImage: hasImage, imageHeightToWidth: newsItem.mediaHeightToWidth)
+        }
+        if newsItem is NewsVideo {
+            return VideoTableViewCell.heightForDetails(headline: newsItem.headline, summary: newsItem.summary, withImage: hasImage, imageHeightToWidth: newsItem.mediaHeightToWidth)
         }
         return 0
     }

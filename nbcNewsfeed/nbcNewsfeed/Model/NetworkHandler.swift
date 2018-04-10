@@ -10,6 +10,7 @@
 
 import Foundation
 import UIKit.UIImage
+import AVFoundation.AVAsset
 
 class NetworkHandler {
     static let feedUrl = "http://msgviewer.nbcnewstools.net:9207/v1/query/curation/news/?"
@@ -104,6 +105,13 @@ class NetworkHandler {
                 }
                 fetchesForURL[url] = nil
                 }.resume()
+        }
+    }
+    
+    static func fetchVideo(url: URL, successHandler: @escaping (AVAsset) -> ()) {
+        imageFetchQueue.async {
+            let asset = AVAsset(url: url)
+            successHandler(asset)
         }
     }
     

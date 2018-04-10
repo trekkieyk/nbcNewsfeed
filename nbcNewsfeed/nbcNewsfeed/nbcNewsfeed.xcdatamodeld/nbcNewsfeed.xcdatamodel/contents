@@ -18,10 +18,15 @@
         <attribute name="summary" attributeType="String" syncable="YES"/>
         <attribute name="url" attributeType="URI" syncable="YES"/>
     </entity>
+    <entity name="NewsVideoEntity" representedClassName=".NewsVideo" parentEntity="NewsSectionItemEntity" syncable="YES">
+        <attribute name="duration" attributeType="String" syncable="YES"/>
+        <attribute name="previewURL" attributeType="URI" syncable="YES"/>
+    </entity>
     <elements>
         <element name="NewsArticleEntity" positionX="-351" positionY="270" width="128" height="45"/>
         <element name="NewsItemEntity" positionX="-63" positionY="-18" width="128" height="90"/>
         <element name="NewsSectionEntity" positionX="160" positionY="135" width="128" height="90"/>
         <element name="NewsSectionItemEntity" positionX="-360" positionY="24" width="128" height="120"/>
+        <element name="NewsVideoEntity" positionX="-153" positionY="126" width="128" height="75"/>
     </elements>
 </model>
