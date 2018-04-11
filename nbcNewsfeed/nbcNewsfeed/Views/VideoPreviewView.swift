@@ -18,18 +18,6 @@ class VideoPreviewView: UIView {
         super.init(coder: aDecoder)
     }
     
-    func configure(url: URL) {
-        player = AVPlayer(url: url)
-        player?.isMuted = true
-        configureLayer()
-    }
-    
-    func configure(item: AVPlayerItem) {
-        player = AVPlayer(playerItem: item)
-        player?.isMuted = true
-        configureLayer()
-    }
-    
     func configure(player: AVPlayer) {
         self.player = player
         player.isMuted = true

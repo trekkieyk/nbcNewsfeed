@@ -15,38 +15,6 @@ import AVFoundation.AVAsset
 class NetworkHandler {
     static let feedUrl = "http://msgviewer.nbcnewstools.net:9207/v1/query/curation/news/?"
     
-    static func getData(count: Int? = nil) {
-        var urlString = feedUrl
-        if let count = count, count > 0 {
-            urlString += "size=\(count)"
-        }
-        guard let url = urlFromString(str: urlString) else {
-            return
-        }
-        URLSession.shared.dataTask(with: url) { (data: Data?, response: URLResponse?, error: Error?) in
-            guard error == nil else {
-                print(error!)
-                return
-            }
-            guard let data = data else {
-                print("Data is missing")
-                return
-            }
-            do {
-                guard let parsedData: [String : Any] = (try JSONSerialization.jsonObject(with: data) as? [AnyObject])?[0] as? [String : Any] else {
-                    print("Data is malformed")
-                    return
-                }
-                let section: NewsItem? = NewsItemFactory.shared.getOrCreateItem(dict: parsedData)
-                print()
-                let otherData = parsedData
-                print(section?.id ?? "")
-            } catch let error as NSError {
-                print(error)
-            }
-        }.resume()
-    }
-    
     static func getData(count: Int? = nil, callback: @escaping ([AnyObject]) -> ()) {
         var urlString = feedUrl
         if let count = count, count > 0 {

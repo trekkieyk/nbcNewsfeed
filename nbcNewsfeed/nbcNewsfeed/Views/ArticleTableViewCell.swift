@@ -10,8 +10,4 @@ import UIKit
 
 class ArticleTableViewCell: SectionItemTableViewCell {
     static let reuseIdentifier: String = "articleCell"
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
 }

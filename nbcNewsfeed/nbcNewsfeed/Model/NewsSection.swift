@@ -92,6 +92,15 @@ class NewsSection: NewsItem {
     
     override func awakeFromFetch() {
         super.awakeFromFetch()
+        itemSet = itemSet.filter({ (item) -> Bool in
+            let keep = Calendar.current.isDateInYesterday(item.published) || Calendar.current.isDateInToday(item.published)
+            if !keep {
+                NewsItemFactory.shared.deregisterItem(item)
+                // TODO: this isn't successfully deleting the stale items.
+                NewsItemFactory.shared.persistentcontainer.viewContext.delete(item as NSManagedObject)
+            }
+            return keep
+        })
         insertItems(newItems: Array<NewsSectionItem>(itemSet))
     }
     

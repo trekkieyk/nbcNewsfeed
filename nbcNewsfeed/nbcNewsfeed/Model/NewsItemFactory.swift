@@ -63,7 +63,7 @@ class NewsItemFactory {
         if sections.isEmpty {
             fetchItemsFromCoreData()
         }
-        NetworkHandler.getData(count: 500) {[weak self] (sections) in
+        NetworkHandler.getData {[weak self] (sections) in
             var newSections: [NewsSection] = []
             for case let jsonSection as [String : Any] in sections {
                 if let newSection = self?.getOrCreateItem(dict: jsonSection) as? NewsSection {
@@ -200,5 +200,10 @@ class NewsItemFactory {
     func registerItem(_ item: NewsItem) {
         allItems[item.id] = item
         print("\(item.id) created")
+    }
+    
+    func deregisterItem(_ item: NewsItem) {
+        allItems.removeValue(forKey: item.id)
+        print("\(item.id) deregistered")
     }
 }
