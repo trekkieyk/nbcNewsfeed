@@ -53,6 +53,9 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if newsItem is NewsVideo {
             cell = tableView.dequeueReusableCell(withIdentifier: VideoTableViewCell.reuseIdentifier, for: indexPath) as? SectionItemTableViewCell
         }
+        if newsItem is NewsSlideshow {
+            cell = tableView.dequeueReusableCell(withIdentifier: SlideshowTableViewCell.reuseIdentifier, for: indexPath) as? SectionItemTableViewCell
+        }
         cell?.populate(newsItem: newsItem, withMedia: !showWithoutImage.contains(indexPath))
         showWithoutImage.remove(indexPath)
         return cell ?? UITableViewCell()
@@ -62,7 +65,7 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
         guard let newsItem = newsItem(forIndexPath: indexPath) else {
             return 0
         }
-        let hasImage = newsItem.teaseImage != nil
+        let hasImage = newsItem.teaseImage != nil || (newsItem as? NewsVideo)?.videoAsset != nil || !((newsItem as? NewsSlideshow)?.images.isEmpty ?? true)
         if hasImage {
             showWithoutImage.remove(indexPath)
         } else {
@@ -73,6 +76,9 @@ class FeedViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         if newsItem is NewsVideo {
             return VideoTableViewCell.heightForDetails(headline: newsItem.headline, summary: newsItem.summary, withImage: hasImage, imageHeightToWidth: newsItem.mediaHeightToWidth)
+        }
+        if newsItem is NewsSlideshow {
+            return SlideshowTableViewCell.heightForDetails(headline: newsItem.headline, summary: newsItem.summary, withImage: hasImage, imageHeightToWidth: newsItem.mediaHeightToWidth)
         }
         return 0
     }

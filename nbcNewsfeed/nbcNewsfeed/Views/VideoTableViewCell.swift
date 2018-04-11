@@ -18,10 +18,6 @@ class VideoTableViewCell: SectionItemTableViewCell {
         super.init(coder: aDecoder)
     }
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-    }
-    
     override func populate(newsItem: NewsSectionItem, withMedia: Bool) {
         guard let videoItem = newsItem as? NewsVideo else {
             return
@@ -29,11 +25,15 @@ class VideoTableViewCell: SectionItemTableViewCell {
         if let player = videoItem.videoPlayer {
             videoView.configure(player: player)
         }
-        let hasVideo: Bool = (videoView.player?.status ?? .failed) != AVPlayerStatus.failed
-        super.populate(newsItem: newsItem, withMedia: withMedia || hasVideo)
+        let hasVideo: Bool = (videoView.player?.currentItem?.status ?? .failed) != AVPlayerItemStatus.failed && withMedia
+        super.populate(newsItem: newsItem, withMedia: withMedia)
         if hasVideo {
             videoView.play()
+            videoView.alpha = 0
             videoView.isHidden = false
+            UIView.animate(withDuration: 0.2, animations: {
+                self.videoView.alpha = 1
+            })
         } else {
             videoView.isHidden = true
         }
@@ -42,5 +42,6 @@ class VideoTableViewCell: SectionItemTableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         videoView.unconfigure()
+        videoView.isHidden = true
     }
 }

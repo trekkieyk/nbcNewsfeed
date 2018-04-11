@@ -34,6 +34,13 @@ class NewsItemFactory {
             static let preview          = "preview"
             static let videoUrl         = "videoUrl"
         }
+        struct Slideshow {
+            static let images           = "images"
+        }
+        struct SlideshowItem {
+            static let id               = "id"
+            static let url              = "url"
+        }
     }
     
     private(set) static var shared: NewsItemFactory = NewsItemFactory()
@@ -63,15 +70,18 @@ class NewsItemFactory {
                     newSections.append(newSection)
                 }
             }
-            self?.sections = newSections
+            if !newSections.isEmpty {
+                self?.sections = newSections
+            }
             NotificationCenter.default.post(Notification(name: Notifications.Factory.sectionsUpdated))
         }
     }
     
+    private func malformedDataError(_ key: String) {
+        print("The dictionary is missing the key '\(key)'")
+    }
+    
     func getOrCreateItem(dict: [String : Any]) -> NewsItem? {
-        let malformedDataError: (String) -> () = {(key: String) in
-            print("The dictionary is missing the key '\(key)'")
-        }
         var newItem: NewsItem? = nil
         guard let typeStr: String = dict[Keys.NewsItem.type] as? String, let type: NewsItemType = NewsItemType(rawValue: typeStr) else {
             malformedDataError(Keys.NewsItem.type)
@@ -141,11 +151,42 @@ class NewsItemFactory {
                 } else {
                     newItem = NewsVideo(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel, duration: duration, previewURL: previewURL)
                 }
+            } else if type == NewsItemType.slideshow {
+                guard let imagesList = dict[Keys.Slideshow.images] as? [[String : Any]] else {
+                    malformedDataError(Keys.Slideshow.images)
+                    return nil
+                }
+                if let slideshow = newItem as? NewsSlideshow {
+                    slideshow.updateFromNetwork(teaseURL: teaseURL)
+                } else {
+                    newItem = NewsSlideshow(id: id, teaseURL: teaseURL, headline: headline, published: published, url: url, summary: summary, breakingLabel: breakingLabel)
+                }
+                var slides: [NewsSlideshowItem] = []
+                for subDict in imagesList {
+                    if let image = getOrCreateSlideshowItem(dict: subDict) {
+                        slides.append(image)
+                    }
+                }
+                (newItem as! NewsSlideshow).updateItems(items: slides)
             }
         }
+        return newItem
+    }
+    
+    private func getOrCreateSlideshowItem(dict: [String : Any]) -> NewsSlideshowItem? {
+        guard let id = dict[Keys.SlideshowItem.id] as? String else {
+            malformedDataError(Keys.SlideshowItem.id)
+            return nil
+        }
+        var newItem = allItems[id] as? NewsSlideshowItem
+        guard let imageUrlStr = dict[Keys.SlideshowItem.url] as? String, let imageURL = URL(string: imageUrlStr) else {
+            malformedDataError(Keys.SlideshowItem.url)
+            return nil
+        }
         if newItem != nil {
-            allItems[newItem!.id] = newItem!
-            print("\(newItem!.id) created")
+            newItem?.updateFromNetwork(teaseURL: imageURL)
+        } else {
+            newItem = NewsSlideshowItem(id: id, imageURL: imageURL)
         }
         return newItem
     }
@@ -158,5 +199,6 @@ class NewsItemFactory {
     
     func registerItem(_ item: NewsItem) {
         allItems[item.id] = item
+        print("\(item.id) created")
     }
 }

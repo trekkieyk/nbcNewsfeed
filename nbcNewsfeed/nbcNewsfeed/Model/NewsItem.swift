@@ -23,6 +23,7 @@ enum NewsItemType: String {
     case article = "article"
     case video = "video"
     case slideshow = "slideshow"
+    case slideshowImage = "slideshowImage"
     case none = "NONE"
 }
 
@@ -97,6 +98,7 @@ class NewsItem: NSManagedObject, NewsItemProtocol {
             fetchImage()
         }
         fatalErrorIfBase()
+        NewsItemFactory.shared.registerItem(self)
     }
     
     override func awakeFromFetch() {

@@ -56,6 +56,12 @@ class NetworkHandler {
             return
         }
         URLSession.shared.dataTask(with: url) { (data: Data?, response: URLResponse?, error: Error?) in
+            var completedNormally = false
+            defer {
+                if !completedNormally {
+                    callback([])
+                }
+            }
             guard error == nil else {
                 print(error!)
                 return
@@ -69,6 +75,7 @@ class NetworkHandler {
                     print("Data is malformed")
                     return
                 }
+                completedNormally = true
                 callback(parsedData)
             } catch let error as NSError {
                 print(error)
